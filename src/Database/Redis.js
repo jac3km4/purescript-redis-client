@@ -159,6 +159,25 @@ exports.hgetImpl = function(conn) {
   };
 };
 
+exports.hmgetImpl = function (conn) {
+  return function (key) {
+    return function (fields) {
+      return function (onError, onSuccess) {
+        conn.hmgetBuffer(key, fields, function (err, val) {
+          if (err !== null) {
+            onError(err);
+            return;
+          }
+          onSuccess(val);
+        });
+        return function (cancelError, cancelerError, cancelerSuccess) {
+          cancelError();
+        };
+      };
+    };
+  };
+};
+
 exports.hsetImpl = function(conn) {
   return function(key) {
     return function(field) {

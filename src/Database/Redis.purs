@@ -20,6 +20,7 @@ module Database.Redis
   , disconnect
   , flushdb
   , hget
+  , hmget
   , hgetall
   , hset
   , get
@@ -177,6 +178,11 @@ foreign import hgetImpl
   -> ByteString
   -> ByteString
   -> EffectFnAff (Nullable ByteString)
+foreign import hmgetImpl
+  :: Connection
+  -> ByteString
+  -> Array ByteString
+  -> EffectFnAff (Array (Nullable ByteString))
 foreign import hsetImpl
   :: Connection
   -> ByteString
@@ -346,6 +352,12 @@ hget
   -> ByteString
   -> Aff (Maybe ByteString)
 hget conn key field = toMaybe <$> (fromEffectFnAff $ hgetImpl conn key field)
+hmget
+  :: Connection
+  -> ByteString
+  -> Array ByteString
+  -> Aff (Array (Maybe ByteString))
+hmget conn key fields = map (map toMaybe) $ fromEffectFnAff $ hmgetImpl conn key (fromFoldable fields)
 hgetall
   :: Connection
   -> ByteString
